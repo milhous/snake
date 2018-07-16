@@ -1,0 +1,2 @@
+# snake
+cocos create snake
