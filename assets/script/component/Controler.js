@@ -1,3 +1,7 @@
+import worker from '../utils/worker.js';
+import { SCENES } from '../config/global.js';
+import { SYS_OPEARTION } from '../config/actions.js';
+
 cc.Class({
     extends: cc.Component,
 
@@ -24,8 +28,6 @@ cc.Class({
     // 获取控制器中心点
     _getCenterVec() {
         this._centerVec = new cc.Vec2(0, 0);
-
-        console.log(this._centerVec);
     },
 
     // 移动控制点
@@ -45,6 +47,13 @@ cc.Class({
         } else {
             this.rocker.setPosition(touchPoint);
         }
+
+        worker.postMessage({
+            cmd: SYS_OPEARTION.UPDATE_DIRECTION,
+            data: {
+                vec: subVec
+            }
+        });
     },
 
     // 松开时回复控制点到中点
