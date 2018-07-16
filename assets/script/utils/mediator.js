@@ -135,8 +135,6 @@ class Mediator {
             this._pushTodoStack(_data.cmd, _data.data);
 
             this.setData(_data.cmd, _data.data);
-
-            console.log('worker', JSON.stringify(_data));
         };
     }
 }
