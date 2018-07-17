@@ -106,7 +106,7 @@ cc.Class({
             }
 
             if (body.startIndex !== -1) {
-                const _pos = _arr[body.startIndex];
+                const _pos = _arr[body.startIndex -1];
 
                 body.x = _pos.x;
                 body.y = _pos.y;
