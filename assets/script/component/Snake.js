@@ -15,7 +15,7 @@ cc.Class({
         this._rangeY = 0;
 
         // 起始长度
-        this._initLen = 5;
+        this._initLen = 10;
 
         // 摄像机
         this._camera = null;
@@ -94,8 +94,11 @@ cc.Class({
         this.node.parent.addChild(_body);
     },
 
-    // 移动身体
-    _moveBody() {
+    /* 
+     * 移动身体
+     * @param (number) dt 距离上一帧间隔时间
+     */
+    _moveBody(dt) {
         const _arr = Array.from(this._footmark);
         const _len = _arr.length;
         const _num = Math.floor(this._mileage / this.bodyPrefab.data.width);
@@ -106,10 +109,13 @@ cc.Class({
             }
 
             if (body.startIndex !== -1) {
-                const _pos = _arr[body.startIndex -1];
+                const preVec = _arr[body.startIndex - 1];
+                const curVec = _arr[body.startIndex];
+                const subVec = cc.pSub(preVec, curVec);
+                const nv = cc.pNormalize(subVec);
 
-                body.x = _pos.x;
-                body.y = _pos.y;
+                body.x += nv.x * body.width / this._speed * dt;
+                body.y += nv.y * body.width / this._speed * dt;
             }
         });
     },
@@ -163,9 +169,9 @@ cc.Class({
 
         this._mileage += cc.pDistance(curVec, lastVec);
 
-        this._recordFootmark(this.node.x, this.node.y);
+        this._recordFootmark(cc.v2(this.node.x, this.node.y));
 
-        this._moveBody();
+        this._moveBody(dt);
     },
 
     // 检查是否超出边界
@@ -180,13 +186,9 @@ cc.Class({
 
     /*
      * 记录足迹
-     * @param (number) x X轴坐标
-     * @param (number) y Y轴坐标
+     * @param (object) vec 向量
      */
-    _recordFootmark(x, y) {
-        this._footmark.unshift({
-            x: x,
-            y: y
-        });
+    _recordFootmark(vec) {
+        this._footmark.unshift(vec);
     }
 });
