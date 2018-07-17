@@ -1,5 +1,5 @@
 // wroker
-import worker from '../utils/worker.js';
+import worker from 'worker';
 
 // 数据组件连接
 class Mediator {

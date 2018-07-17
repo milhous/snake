@@ -1,6 +1,6 @@
-import mediator from '../utils/mediator.js';
-import { SCENES } from '../config/global.js';
-import { SYS_OPEARTION } from '../config/actions.js';
+import mediator from 'mediator';
+import { SCENES } from 'global';
+import { SYS_OPEARTION } from 'actions';
 
 cc.Class({
     extends: cc.Component,
@@ -98,9 +98,13 @@ cc.Class({
 
     // 初始蛇
     initSnake() {
-        this.snake.setDirectionVec(new cc.Vec2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1()));
+        this.snake.init({
+            x: this.node.width / 2,
+            y: this.node.height / 2,
+            camera: this.camera
+        });
 
-        this.snake.setMoveRange(this.node.width / 2, this.node.height / 2);
+        this.snake.setDirectionVec(cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1()));
 
         this.snake.setSpeed(this._speed);
     },

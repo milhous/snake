@@ -1,6 +1,6 @@
-import worker from '../utils/worker.js';
-import { SCENES } from '../config/global.js';
-import { SYS_OPEARTION } from '../config/actions.js';
+import worker from 'worker';
+import { SCENES } from 'global';
+import { SYS_OPEARTION } from 'actions';
 
 cc.Class({
     extends: cc.Component,
