@@ -111,7 +111,7 @@ cc.Class({
 
     // 加速
     speedUp() {
-        this._speed = 0.06;
+        this._speed = 0.24;
 
         this.snake.setSpeed(this._speed);
     },

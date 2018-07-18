@@ -71,9 +71,11 @@ cc.Class({
             return;
         }
 
-        this._updatePosition(dt);
-
         this._updateHeadAngle();
+
+        this._updateHeadPosition();
+
+        this._updateBodyPosition();
 
         this._checkOutRange();
     },
@@ -90,34 +92,10 @@ cc.Class({
         const _body = cc.instantiate(this.bodyPrefab);
         this._bodys.push(_body);
         _body.zIndex = 100 - this._bodys.length;
-        _body.startIndex = -1;
+        _body.x = this.node.x;
+        _body.y = this.node.y;
+        _body.isMove = false;
         this.node.parent.addChild(_body);
-    },
-
-    /* 
-     * 移动身体
-     * @param (number) dt 距离上一帧间隔时间
-     */
-    _moveBody(dt) {
-        const _arr = Array.from(this._footmark);
-        const _len = _arr.length;
-        const _num = Math.floor(this._mileage / this.bodyPrefab.data.width);
-
-        this._bodys.map((body, index) => {
-            if (index === _num - 1 && body.startIndex === -1) {
-                body.startIndex = _len - 1;
-            }
-
-            if (body.startIndex !== -1) {
-                const preVec = _arr[body.startIndex - 1];
-                const curVec = _arr[body.startIndex];
-                const subVec = cc.pSub(preVec, curVec);
-                const nv = cc.pNormalize(subVec);
-
-                body.x += nv.x * body.width / this._speed * dt;
-                body.y += nv.y * body.width / this._speed * dt;
-            }
-        });
     },
 
     /*
@@ -153,25 +131,34 @@ cc.Class({
         this.head.rotation = -angle;
     },
 
-    /* 
-     * 更新位置
-     * @param (number) dt 距离上一帧间隔时间
-     */
-    _updatePosition(dt) {
+    // 更新头部位置
+    _updateHeadPosition() {
         this._normalize = cc.pNormalize(this._direction);
 
-        const lastVec = cc.v2(this.node.x, this.node.y);
+        this.node.x += this._normalize.x * this.node.width * this._speed;
+        this.node.y += this._normalize.y * this.node.width * this._speed;
+    },
 
-        this.node.x += this._normalize.x * this.node.width / this._speed * dt;
-        this.node.y += this._normalize.y * this.node.width / this._speed * dt;
+    // 更新身体位置
+    _updateBodyPosition() {
+        this._bodys.map((body, index, arr) => {
+            const curVec = index === 0 ? this.node.getPosition() : arr[index - 1].getPosition();
+            const preVec = body.getPosition();
+            const subVec = cc.pSub(curVec, preVec);
 
-        const curVec = cc.v2(this.node.x, this.node.y);
+            if (!body.isMove) {
+                const distance = cc.pDistance(curVec, preVec);
 
-        this._mileage += cc.pDistance(curVec, lastVec);
+                if (distance >= body.width / 2) {
+                    body.isMove = true;
+                }
+            }
 
-        this._recordFootmark(cc.v2(this.node.x, this.node.y));
-
-        this._moveBody(dt);
+            if (body.isMove) {
+                body.x += subVec.x * this._speed;
+                body.y += subVec.y * this._speed;
+            }
+        });
     },
 
     // 检查是否超出边界
@@ -182,13 +169,5 @@ cc.Class({
         if (Math.abs(this.node.y) >= this._rangeY) {
             this._direction.y = -this._normalize.y;
         }
-    },
-
-    /*
-     * 记录足迹
-     * @param (object) vec 向量
-     */
-    _recordFootmark(vec) {
-        this._footmark.unshift(vec);
     }
 });
