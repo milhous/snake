@@ -16,6 +16,11 @@ cc.Class({
             type: cc.Node,
             tooltip: '按钮 - 加速'
         },
+        food: {
+            default: null,
+            type: cc.Node,
+            tooltip: '组件 - 食物'
+        },
         snake: {
             default: null,
             type: cc.Node,
@@ -64,6 +69,10 @@ cc.Class({
 
     // 初始化组件
     initComponent() {
+        // 食物
+        this.food = this.food.getComponent('Food');
+        this.initFood();
+
         // 蛇
         this.snake = this.snake.getComponent('Snake');
         this.initSnake();
@@ -107,6 +116,15 @@ cc.Class({
         this.snake.setDirectionVec(cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1()));
 
         this.snake.setSpeed(this._speed);
+    },
+
+    // 初始化食物
+    initFood() {
+        this.food.init();
+
+        for(let i = 0; i < 100; i++){
+            this.food.add();
+        }
     },
 
     // 加速

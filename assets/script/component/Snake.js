@@ -21,11 +21,6 @@ cc.Class({
         this._camera = null;
         // 蛇身
         this._bodys = [];
-
-        // 移动里程
-        this._mileage = 0;
-        // 移动足迹
-        this._footmark = [];
     },
 
     properties: {
