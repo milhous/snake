@@ -16,10 +16,10 @@ cc.Class({
             type: cc.Node,
             tooltip: '按钮 - 加速'
         },
-        food: {
+        canteen: {
             default: null,
             type: cc.Node,
-            tooltip: '组件 - 食物'
+            tooltip: '组件 - 食堂'
         },
         snake: {
             default: null,
@@ -41,6 +41,11 @@ cc.Class({
     onLoad() {
         // 显示FPS信息
         cc.director.setDisplayStats(false);
+
+        // 碰撞检测开启
+        const manager = cc.director.getCollisionManager();
+        manager.enabled = true;
+        manager.enabledDrawBoundingBox = true;
 
         mediator.init();
 
@@ -69,9 +74,9 @@ cc.Class({
 
     // 初始化组件
     initComponent() {
-        // 食物
-        this.food = this.food.getComponent('Food');
-        this.initFood();
+        // 食堂
+        this.canteen = this.canteen.getComponent('Canteen');
+        this.initCanteen();
 
         // 蛇
         this.snake = this.snake.getComponent('Snake');
@@ -119,11 +124,11 @@ cc.Class({
     },
 
     // 初始化食物
-    initFood() {
-        this.food.init();
+    initCanteen() {
+        this.canteen.init();
 
         for(let i = 0; i < 100; i++){
-            this.food.add();
+            this.canteen.add();
         }
     },
 

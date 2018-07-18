@@ -1,24 +1,12 @@
 cc.Class({
     extends: cc.Component,
 
-    ctor() {
-        // 对象池
-        this._pool = null;
-        // 初始数量
-        this._initCount = 100;
-    },
-
     properties: {
-        foodPrefab: {
-            default: null,
-            type: cc.Prefab,
-            tooltip: '预制资源 - 食物'
-        },
-        foodSkin: {
+        skin: {
             default: [],
             type: [cc.SpriteFrame],
             tooltip: 'SpriteFrame - 食物皮肤'
-        },
+        }
     },
 
     onLoad() {
@@ -29,51 +17,34 @@ cc.Class({
 
     },
 
-    // 初始化
-    init() {
-        // 创建麻将对象池
-        this._createPool();
+    onCollisionEnter(other, self) {
+        console.log('on collision enter');
+
+        // 碰撞系统会计算出碰撞组件在世界坐标系下的相关的值，并放到 world 这个属性里面
+        var world = self.world;
+
+        // 碰撞组件的 aabb 碰撞框
+        var aabb = world.aabb;
+
+        // 上一次计算的碰撞组件的 aabb 碰撞框
+        var preAabb = world.preAabb;
+
+        // 碰撞框的世界矩阵
+        var t = world.transform;
+
+        // 以下属性为圆形碰撞组件特有属性
+        var r = world.radius;
+        var p = world.position;
     },
 
-    // 创建对象池
-    _createPool() {
-        this._pool = new cc.NodePool();
-
-        for (let i = 0; i < this._initCount; ++i) {
-            // 创建节点
-            const _food = cc.instantiate(this.foodPrefab);
-            // 通过 putInPool 接口放入对象池
-            this._pool.put(_food);
-        }
+    // 更新皮肤
+    updateSkin() {
+        const _index = this._getRandom(0, this.skin.length);
+        const _sp = this.node.getComponent(cc.Sprite);
+        _sp.spriteFrame = this.skin[_index];
     },
 
-    // 创建食物
-    _create() {
-        let _food = null;
-
-        if (this._pool.size() > 0) { // 通过 size 接口判断对象池中是否有空闲的对象
-            _food = this._pool.get();
-        } else { // 如果没有空闲对象，也就是对象池中备用对象不够时，用 cc.instantiate 重新创建
-            _food = cc.instantiate(this.foodPrefab);
-        }
-
-        return _food;
-    },
-
-    // 增加食物
-    add() {
-        const _x = cc.randomMinus1To1() * this.node.width / 2;
-        const _y = cc.randomMinus1To1() * this.node.height / 2;
-        const _index = this._getRandom(0, this.foodSkin.length);
-
-        const _food = this._create();
-        const _sp = _food.getComponent(cc.Sprite);
-        _sp.spriteFrame = this.foodSkin[_index];
-
-        _food.parent = this.node;
-        _food.x = _x;
-        _food.y = _y;
-    },
+    // update (dt) {},
 
     // 获取随机数
     _getRandom(n, m) {
