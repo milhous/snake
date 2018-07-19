@@ -68,9 +68,7 @@ cc.Class({
     },
 
     lateUpdate(dt) {
-        // camera跟踪蛇头 关键代码！！！
-        const targetPos = this.snake.getHeadPositon();
-        this.camera.node.position = this.camera.node.parent.convertToNodeSpaceAR(targetPos);
+        this.updateCameraPosition();
     },
 
     // 初始化组件
@@ -144,5 +142,44 @@ cc.Class({
         this._speed = 0.12;
 
         this.snake.setSpeed(this._speed);
+    },
+
+    // 更新摄像机位置
+    updateCameraPosition() {
+        // camera跟踪蛇头 关键代码！！！
+        const snakePos = this.snake.getHeadPositon();
+        const cameraPos = this.checkCameraOutRange(snakePos);
+
+        this.camera.node.position = cameraPos;
+    },
+
+    /*
+     * 检查摄像机超出边界
+     * @param (object) vec 向量
+     */
+    checkCameraOutRange(vec) {
+        const _vec = this.camera.node.parent.convertToNodeSpaceAR(vec);
+        const snakeMoveRange = this.snake.getMoveRange();
+        const designResolution = this.getComponent(cc.Canvas).designResolution;
+        const cameraMoveRangeX = Math.floor((snakeMoveRange.x - designResolution.width) / 2);
+        const cameraMoveRangeY = Math.floor((snakeMoveRange.y - designResolution.height) / 2);
+
+        if (_vec.x > cameraMoveRangeX) {
+            _vec.x = cameraMoveRangeX;
+        }
+
+        if (_vec.x < -cameraMoveRangeX) {
+            _vec.x = -cameraMoveRangeX;
+        }
+
+        if (_vec.y > cameraMoveRangeY) {
+            _vec.y = cameraMoveRangeY;
+        }
+
+        if (_vec.y < -cameraMoveRangeY) {
+            _vec.y = -cameraMoveRangeY;
+        }
+
+        return _vec;
     }
 });

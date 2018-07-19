@@ -37,7 +37,7 @@ cc.Class({
     },
 
     onLoad() {
-        
+
     },
 
     start() {
@@ -53,7 +53,7 @@ cc.Class({
         x,
         y
     }) {
-        this.setMoveRange(this.node.width, this.node.height);
+        this.setMoveRange(this.node.width / 2, this.node.height / 2);
 
         this._createHead();
 
@@ -136,6 +136,13 @@ cc.Class({
     // 获取蛇头位置
     getHeadPositon() {
         const _vec = this._head.convertToWorldSpaceAR(cc.Vec2.ZERO);
+
+        return _vec;
+    },
+
+    // 获取活动区域
+    getMoveRange() {
+        const _vec = cc.v2(this.node.width, this.node.height);
 
         return _vec;
     },
