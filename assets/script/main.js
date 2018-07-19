@@ -8,6 +8,12 @@ cc.Class({
     ctor() {
         // 加速度
         this._speed = 0.12;
+
+        // 蛇
+        this.snake = null;
+
+        // 食堂
+        this.canteen = null;
     },
 
     properties: {
@@ -16,20 +22,15 @@ cc.Class({
             type: cc.Node,
             tooltip: '按钮 - 加速'
         },
-        canteen: {
-            default: null,
-            type: cc.Node,
-            tooltip: '组件 - 食堂'
-        },
-        snake: {
-            default: null,
-            type: cc.Node,
-            tooltip: '组件 - 蛇'
-        },
         controler: {
             default: null,
             type: cc.Node,
             tooltip: '组件 - 方向控制器'
+        },
+        battlefield: {
+            default: null,
+            type: cc.Node,
+            tooltip: '组件 - 战场'
         },
         camera: {
             default: null,
@@ -68,18 +69,18 @@ cc.Class({
 
     lateUpdate(dt) {
         // camera跟踪蛇头 关键代码！！！
-        const targetPos = this.snake.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+        const targetPos = this.snake.getHeadPositon();
         this.camera.node.position = this.camera.node.parent.convertToNodeSpaceAR(targetPos);
     },
 
     // 初始化组件
     initComponent() {
-        // 食堂
-        this.canteen = this.canteen.getComponent('Canteen');
+        // 食品工厂
+        this.factory = this.battlefield.getComponent('Factory');
         this.initCanteen();
 
         // 蛇
-        this.snake = this.snake.getComponent('Snake');
+        this.snake = this.battlefield.getComponent('Snake');
         this.initSnake();
 
         // 方向控制器
@@ -114,8 +115,7 @@ cc.Class({
     initSnake() {
         this.snake.init({
             x: this.node.width / 2,
-            y: this.node.height / 2,
-            camera: this.camera
+            y: this.node.height / 2
         });
 
         this.snake.setDirectionVec(cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1()));
@@ -125,10 +125,10 @@ cc.Class({
 
     // 初始化食物
     initCanteen() {
-        this.canteen.init();
+        this.factory.init();
 
         for(let i = 0; i < 100; i++){
-            this.canteen.add();
+            this.factory.add();
         }
     },
 

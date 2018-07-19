@@ -61,9 +61,9 @@ cc.Class({
         const _y = cc.randomMinus1To1() * this.node.height / 2;
 
         const _food = this._create();
-        _food.parent = this.node;
         _food.x = _x;
         _food.y = _y;
+        this.node.addChild(_food);
 
         _food.getComponent('Food').updateSkin();
     }
