@@ -1,5 +1,4 @@
 import worker from 'worker';
-import { SCENES } from 'global';
 import { SYS_OPEARTION } from 'actions';
 
 cc.Class({

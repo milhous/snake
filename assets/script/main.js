@@ -98,6 +98,15 @@ cc.Class({
                 this.snake.setDirectionVec(props.vec);
             }
         });
+
+        // SYSTEM - 回收食物
+        mediator.add({
+            scene: SCENES.GAME,
+            action: SYS_OPEARTION.RECOVER_FOOD,
+            callback: (props) => {
+                this.recoverFood(props.uuid);
+            }
+        });
     },
 
     // 初始化事件
@@ -181,5 +190,15 @@ cc.Class({
         }
 
         return _vec;
+    },
+
+    /**
+     * 回收
+     * @param (string) uuid 节点uuid  
+     **/
+    recoverFood(uuid) {
+        this.factory.recover(uuid);
+
+        this.factory.add();
     }
 });

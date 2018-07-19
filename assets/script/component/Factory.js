@@ -65,6 +65,22 @@ cc.Class({
         _food.y = _y;
         this.node.addChild(_food);
 
-        _food.getComponent('Food').updateSkin();
+        const foodComp = _food.getComponent('Food');
+        foodComp.updateSkin();
+        foodComp.openCollision();
+    },
+
+    /**
+     * 回收
+     * @param (string) uuid 节点uuid  
+     **/
+    recover(uuid) {
+        const _node = this.node.getChildByUuid(uuid);
+
+        // 移除指定对象上的所有动作
+        _node.stopAllActions();
+
+        // 放回对象池
+        this._pool.put(_node);
     }
 });

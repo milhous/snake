@@ -1,5 +1,16 @@
+import worker from 'worker';
+import { SYS_OPEARTION } from 'actions';
+
 cc.Class({
     extends: cc.Component,
+
+    ctor() {
+        // 移动速度
+        this._speed = 4.2;
+
+        // 目标
+        this._target = null;
+    },
 
     properties: {
         skin: {
@@ -17,8 +28,15 @@ cc.Class({
 
     },
 
+    update(dt) {
+        this._effect();
+    },
+
     onCollisionEnter(other, self) {
-        self.node.active = false;
+        const circleCollider = self.node.getComponent(cc.CircleCollider);
+        circleCollider.enabled = false;
+
+        this._target = other.node;
     },
 
     // 更新皮肤
@@ -28,7 +46,47 @@ cc.Class({
         _sp.spriteFrame = this.skin[_index];
     },
 
-    // update (dt) {},
+    // 开启碰撞检测
+    openCollision() {
+        const circleCollider = this.node.getComponent(cc.CircleCollider);
+        circleCollider.enabled = true;
+    },
+
+    // 动效
+    _effect() {
+        if (this._target === null) {
+            return;
+        }
+
+        const preVec = this.node.getPosition();
+        const curVec = this._target.getPosition();
+        const distance = cc.pDistance(curVec, preVec);
+
+        if (distance > this._target.width / 2) {
+            const subVec = cc.pSub(curVec, preVec);
+
+            if (subVec.x < 0) {
+                this.node.x += -this._speed;
+            } else {
+                this.node.x += this._speed;
+            }
+
+            if (subVec.y < 0) {
+                this.node.y += -this._speed;
+            } else {
+                this.node.y += this._speed;
+            }
+        } else {
+            this._target = null;
+
+            worker.postMessage({
+                cmd: SYS_OPEARTION.RECOVER_FOOD,
+                data: {
+                    uuid: this.node.uuid
+                }
+            });
+        }
+    },
 
     // 获取随机数
     _getRandom(n, m) {

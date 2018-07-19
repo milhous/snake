@@ -11,7 +11,8 @@ const USER_BEHAVIOR = {
  * 系统操作
  */
 const SYS_OPEARTION = {
-    UPDATE_DIRECTION: 'sys::updateDirection'
+    UPDATE_DIRECTION: 'sys::updateDirection', // 更新方向
+    RECOVER_FOOD: 'sys:recoverFood' // 回收资源
 };
 
 /*
