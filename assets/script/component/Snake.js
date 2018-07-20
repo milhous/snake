@@ -80,8 +80,6 @@ cc.Class({
         this._updateHeadPosition();
 
         this._updateBodyPosition();
-
-        this._checkOutRange();
     },
 
     // 创建头部
@@ -170,8 +168,11 @@ cc.Class({
     _updateHeadPosition() {
         this._normalize = cc.pNormalize(this._direction);
 
-        this._head.x += this._normalize.x * this._head.width * this._speed;
-        this._head.y += this._normalize.y * this._head.width * this._speed;
+        const _x = this._head.x + this._normalize.x * this._head.width * this._speed;
+        const _y = this._head.y + this._normalize.y * this._head.width * this._speed;
+        const _vec = this._checkOutRange(_x, _y);
+
+        this._head.setPosition(_vec);
     },
 
     // 更新身体位置
@@ -196,13 +197,38 @@ cc.Class({
         });
     },
 
-    // 检查是否超出边界
-    _checkOutRange() {
-        if (Math.abs(this._head.x) >= this._rangeX) {
+    /*
+     * 检查是否超出边界
+     * @param (number) x X轴位置
+     * @param (number) y Y轴位置
+     */
+    _checkOutRange(x, y) {
+        const _vec = cc.v2(x, y);
+
+        if (_vec.x > this._rangeX) {
+            _vec.x = this._rangeX;
+        }
+
+        if (_vec.x < -this._rangeX) {
+            _vec.x = -this._rangeX;
+        }
+
+        if (_vec.y > this._rangeY) {
+            _vec.y = this._rangeY;
+        }
+
+        if (_vec.y < -this._rangeY) {
+            _vec.y = -this._rangeY;
+        }
+
+        if (Math.abs(_vec.x) >= this._rangeX) {
             this._direction.x = -this._normalize.x;
         }
-        if (Math.abs(this._head.y) >= this._rangeY) {
+
+        if (Math.abs(_vec.y) >= this._rangeY) {
             this._direction.y = -this._normalize.y;
         }
+
+        return _vec;
     }
 });

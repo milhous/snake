@@ -2,11 +2,6 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        viewCollider: {
-            default: null,
-            type: cc.BoxCollider,
-            tooltip: '视野范围'
-        },
         skin: {
             default: [],
             type: [cc.SpriteFrame],
@@ -22,15 +17,6 @@ cc.Class({
 
     start () {
 
-    },
-
-    /*
-     * 设置视野碰撞范围
-     * @param (number) width 宽
-     * @param (number) height 高
-     */
-    setViewRange(width, height) {
-        this.viewCollider.size = cc.size(width, height);
     },
 
     /*
