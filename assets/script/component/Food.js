@@ -7,7 +7,7 @@ cc.Class({
 
     ctor() {
         // 移动速度
-        this._speed = 4.2;
+        this._speed = 4.6;
 
         // 目标
         this._target = null;

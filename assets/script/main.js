@@ -41,7 +41,7 @@ cc.Class({
 
     onLoad() {
         // 显示FPS信息
-        cc.director.setDisplayStats(false);
+        cc.director.setDisplayStats(true);
 
         // 碰撞检测开启
         const manager = cc.director.getCollisionManager();
@@ -169,9 +169,9 @@ cc.Class({
     checkCameraOutRange(vec) {
         const _vec = this.camera.node.parent.convertToNodeSpaceAR(vec);
         const snakeMoveRange = this.snake.getMoveRange();
-        const designResolution = this.getComponent(cc.Canvas).designResolution;
-        const cameraMoveRangeX = Math.floor((snakeMoveRange.x - designResolution.width) / 2);
-        const cameraMoveRangeY = Math.floor((snakeMoveRange.y - designResolution.height) / 2);
+        const visibleSize = cc.director.getVisibleSize();
+        const cameraMoveRangeX = Math.floor((snakeMoveRange.x - visibleSize.width) / 2);
+        const cameraMoveRangeY = Math.floor((snakeMoveRange.y - visibleSize.height) / 2);
 
         if (_vec.x > cameraMoveRangeX) {
             _vec.x = cameraMoveRangeX;
