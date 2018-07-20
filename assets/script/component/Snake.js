@@ -1,3 +1,5 @@
+import { getRandom } from 'tools';
+
 cc.Class({
     extends: cc.Component,
 
@@ -17,6 +19,8 @@ cc.Class({
         // 起始长度
         this._initLen = 10;
 
+        // 皮肤索引值
+        this._skinIndex = 0;
         // 蛇头
         this._head = null;
         // 蛇身
@@ -37,7 +41,7 @@ cc.Class({
     },
 
     onLoad() {
-
+    
     },
 
     start() {
@@ -53,6 +57,8 @@ cc.Class({
         x,
         y
     }) {
+        this._skinIndex = getRandom(0, 4);
+
         this.setMoveRange(this.node.width / 2, this.node.height / 2);
 
         this._createHead();
@@ -86,6 +92,9 @@ cc.Class({
         _head.y = 0;
         this.node.addChild(_head);
 
+        const headComp = _head.getComponent('Head');
+        headComp.updateSkin(this._skinIndex);
+
         this._head = _head;
     },
 
@@ -105,6 +114,9 @@ cc.Class({
         _body.y = this._head.y;
         _body.isMove = false;
         this.node.addChild(_body);
+
+        const bodyComp = _body.getComponent('Body');
+        bodyComp.updateSkin(this._skinIndex);
     },
 
     /*

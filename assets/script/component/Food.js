@@ -1,4 +1,5 @@
 import worker from 'worker';
+import { getRandom } from 'tools';
 import { SYS_OPEARTION } from 'actions';
 
 cc.Class({
@@ -41,7 +42,7 @@ cc.Class({
 
     // 更新皮肤
     updateSkin() {
-        const _index = this._getRandom(0, this.skin.length);
+        const _index = getRandom(0, this.skin.length);
         const _sp = this.node.getComponent(cc.Sprite);
         _sp.spriteFrame = this.skin[_index];
     },
@@ -86,10 +87,5 @@ cc.Class({
                 }
             });
         }
-    },
-
-    // 获取随机数
-    _getRandom(n, m) {
-        return Math.round(Math.random() * (m - n) + n);
     }
 });
