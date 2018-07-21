@@ -1,6 +1,10 @@
 import mediator from 'mediator';
-import { SCENES } from 'global';
-import { SYS_OPEARTION } from 'actions';
+import {
+    SCENES
+} from 'global';
+import {
+    SYS_OPEARTION
+} from 'actions';
 
 cc.Class({
     extends: cc.Component,
@@ -27,10 +31,15 @@ cc.Class({
             type: cc.Node,
             tooltip: '组件 - 方向控制器'
         },
-        battlefield: {
+        factory: {
             default: null,
             type: cc.Node,
-            tooltip: '组件 - 战场'
+            tooltip: '组件 - 食品工厂'
+        },
+        snake: {
+            default: null,
+            type: cc.Node,
+            tooltip: '组件 - 蛇'
         },
         camera: {
             default: null,
@@ -74,11 +83,11 @@ cc.Class({
     // 初始化组件
     initComponent() {
         // 食品工厂
-        this.factory = this.battlefield.getComponent('Factory');
+        this.factory = this.factory.getComponent('Factory');
         this.initCanteen();
 
         // 蛇
-        this.snake = this.battlefield.getComponent('Snake');
+        this.snake = this.snake.getComponent('Snake');
         this.initSnake();
 
         // 方向控制器
@@ -134,7 +143,7 @@ cc.Class({
     initCanteen() {
         this.factory.init();
 
-        for(let i = 0; i < 100; i++){
+        for (let i = 0; i < 100; i++) {
             this.factory.add();
         }
     },
