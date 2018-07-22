@@ -1,5 +1,6 @@
 import mediator from 'mediator';
 import {
+    SPEED,
     SCENES
 } from 'global';
 import {
@@ -10,9 +11,6 @@ cc.Class({
     extends: cc.Component,
 
     ctor() {
-        // 加速度
-        this._speed = 0.12;
-
         // 蛇
         this.snake = null;
 
@@ -31,20 +29,10 @@ cc.Class({
             type: cc.Node,
             tooltip: '组件 - 方向控制器'
         },
-        factory: {
+        battlefield: {
             default: null,
             type: cc.Node,
-            tooltip: '组件 - 食品工厂'
-        },
-        snake: {
-            default: null,
-            type: cc.Node,
-            tooltip: '组件 - 蛇'
-        },
-        camera: {
-            default: null,
-            type: cc.Node,
-            tooltip: '组件 - 摄像机'
+            tooltip: '组件 - 战场'
         }
     },
 
@@ -57,54 +45,50 @@ cc.Class({
         manager.enabled = true;
         manager.enabledDrawBoundingBox = true;
 
+        // 通信
         mediator.init();
 
-        this.initComponent();
+        // 初始化组件
+        this._initComponent();
 
-        this.initConnect();
+        // 初始化组件数据连接
+        this._initConnect();
 
-        this.initEvent();
+        // 初始化事件
+        this._initEvent();
     },
 
     start() {
-
+        this._speedNormal();
     },
 
     update(dt) {
         mediator.update(dt);
 
-        this.snake.move(dt);
+        this.battlefield.updateState(dt);
     },
 
     lateUpdate(dt) {
-        this.updateCameraPosition();
+        this.battlefield.updateCameraPosition();
     },
 
     // 初始化组件
-    initComponent() {
-        // 食品工厂
-        this.factory = this.factory.getComponent('Factory');
-        this.initCanteen();
-
-        // 蛇
-        this.snake = this.snake.getComponent('Snake');
-        this.initSnake();
+    _initComponent() {
+        // 战场
+        this.battlefield = this.battlefield.getComponent('Battlefield');
 
         // 方向控制器
         this.controler = this.controler.getComponent('Controler');
-
-        // 摄像机
-        this.camera = this.camera.getComponent(cc.Camera);
     },
 
     // 初始化组件数据连接
-    initConnect() {
+    _initConnect() {
         // SYSTEM - 更新方向变量
         mediator.add({
             scene: SCENES.GAME,
             action: SYS_OPEARTION.UPDATE_DIRECTION,
             callback: (props) => {
-                this.snake.setDirectionVec(props.vec);
+                this.battlefield.setSnakeDirectionVec(props.vec);
             }
         });
 
@@ -113,101 +97,27 @@ cc.Class({
             scene: SCENES.GAME,
             action: SYS_OPEARTION.RECOVER_FOOD,
             callback: (props) => {
-                this.recoverFood(props.uuid);
+                this.battlefield.recoverFood(props.uuid);
             }
         });
     },
 
     // 初始化事件
-    initEvent() {
+    _initEvent() {
         this.node.on(cc.Node.EventType.TOUCH_MOVE, this.controler.move, this.controler);
         this.node.on(cc.Node.EventType.TOUCH_END, this.controler.end, this.controler);
 
-        this.btnSpeed.on(cc.Node.EventType.TOUCH_START, this.speedUp, this);
-        this.btnSpeed.on(cc.Node.EventType.TOUCH_END, this.speedNormal, this);
-    },
-
-    // 初始蛇
-    initSnake() {
-        this.snake.init({
-            x: this.node.width / 2,
-            y: this.node.height / 2
-        });
-
-        this.snake.setDirectionVec(cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1()));
-
-        this.snake.setSpeed(this._speed);
-    },
-
-    // 初始化食物
-    initCanteen() {
-        this.factory.init();
-
-        for (let i = 0; i < 100; i++) {
-            this.factory.add();
-        }
+        this.btnSpeed.on(cc.Node.EventType.TOUCH_START, this._speedUp, this);
+        this.btnSpeed.on(cc.Node.EventType.TOUCH_END, this._speedNormal, this);
     },
 
     // 加速
-    speedUp() {
-        this._speed = 0.24;
-
-        this.snake.setSpeed(this._speed);
+    _speedUp() {
+        this.battlefield.setSnakeSpeed(SPEED.UP);
     },
 
     // 加速
-    speedNormal() {
-        this._speed = 0.12;
-
-        this.snake.setSpeed(this._speed);
-    },
-
-    // 更新摄像机位置
-    updateCameraPosition() {
-        // camera跟踪蛇头 关键代码！！！
-        const snakePos = this.snake.getHeadPositon();
-        const cameraPos = this.checkCameraOutRange(snakePos);
-
-        this.camera.node.position = cameraPos;
-    },
-
-    /*
-     * 检查摄像机超出边界
-     * @param (object) vec 向量
-     */
-    checkCameraOutRange(vec) {
-        const _vec = this.camera.node.parent.convertToNodeSpaceAR(vec);
-        const snakeMoveRange = this.snake.getMoveRange();
-        const visibleSize = cc.director.getVisibleSize();
-        const cameraMoveRangeX = Math.floor((snakeMoveRange.x - visibleSize.width) / 2);
-        const cameraMoveRangeY = Math.floor((snakeMoveRange.y - visibleSize.height) / 2);
-
-        if (_vec.x > cameraMoveRangeX) {
-            _vec.x = cameraMoveRangeX;
-        }
-
-        if (_vec.x < -cameraMoveRangeX) {
-            _vec.x = -cameraMoveRangeX;
-        }
-
-        if (_vec.y > cameraMoveRangeY) {
-            _vec.y = cameraMoveRangeY;
-        }
-
-        if (_vec.y < -cameraMoveRangeY) {
-            _vec.y = -cameraMoveRangeY;
-        }
-
-        return _vec;
-    },
-
-    /**
-     * 回收
-     * @param (string) uuid 节点uuid  
-     **/
-    recoverFood(uuid) {
-        this.factory.recover(uuid);
-
-        this.factory.add();
+    _speedNormal() {
+        this.battlefield.setSnakeSpeed(SPEED.NORMAL);
     }
 });
