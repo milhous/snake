@@ -28,6 +28,11 @@ cc.Class({
     init() {
         // 创建麻将对象池
         this._createPool();
+
+        // 创建食物
+        for (let i = 0; i < 100; i++) {
+            this.add();
+        }
     },
 
     // 创建对象池
@@ -42,25 +47,12 @@ cc.Class({
         }
     },
 
-    // 创建食物
-    _create() {
-        let _food = null;
-
-        if (this._pool.size() > 0) { // 通过 size 接口判断对象池中是否有空闲的对象
-            _food = this._pool.get();
-        } else { // 如果没有空闲对象，也就是对象池中备用对象不够时，用 cc.instantiate 重新创建
-            _food = cc.instantiate(this.foodPrefab);
-        }
-
-        return _food;
-    },
-
     // 增加食物
-    add() {
-        const _x = cc.randomMinus1To1() * this.node.width / 2;
-        const _y = cc.randomMinus1To1() * this.node.height / 2;
+    add(x, y) {
+        const _x = typeof x === 'number' ? x : cc.randomMinus1To1() * this.node.width / 2;
+        const _y = typeof y === 'number' ? y : cc.randomMinus1To1() * this.node.height / 2;
 
-        const _food = this._create();
+        const _food = this._getNodeFromPool();
         _food.x = _x;
         _food.y = _y;
         this.node.addChild(_food);
@@ -82,5 +74,18 @@ cc.Class({
 
         // 放回对象池
         this._pool.put(_node);
-    }
+    },
+
+    // 从对象池中获取节点
+    _getNodeFromPool() {
+        let _node = null;
+
+        if (this._pool.size() > 0) { // 通过 size 接口判断对象池中是否有空闲的对象
+            _node = this._pool.get();
+        } else { // 如果没有空闲对象，也就是对象池中备用对象不够时，用 cc.instantiate 重新创建
+            _node = cc.instantiate(this.foodPrefab);
+        }
+
+        return _node;
+    },
 });

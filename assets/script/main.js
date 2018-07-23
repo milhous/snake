@@ -16,6 +16,9 @@ cc.Class({
 
         // 食堂
         this.canteen = null;
+
+        // 用户ID
+        this._userId = 'default';
     },
 
     properties: {
@@ -29,10 +32,20 @@ cc.Class({
             type: cc.Node,
             tooltip: '组件 - 方向控制器'
         },
-        battlefield: {
+        factory: {
             default: null,
             type: cc.Node,
-            tooltip: '组件 - 战场'
+            tooltip: '组件 - 食品工厂'
+        },
+        snakeManager: {
+            default: null,
+            type: cc.Node,
+            tooltip: '组件 - 蛇'
+        },
+        camera: {
+            default: null,
+            type: cc.Node,
+            tooltip: '组件 - 摄像机'
         }
     },
 
@@ -60,22 +73,37 @@ cc.Class({
 
     start() {
         this._speedNormal();
+
+        this.factory.init();
+
+        this.snakeManager.init();
+
+        this.snakeManager.create({
+            name: this._userId,
+            x: 0,
+            y: 0,
+            speed: SPEED.NORMAL,
+            direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
+        });
     },
 
     update(dt) {
         mediator.update(dt);
 
-        this.battlefield.updateState(dt);
+        this.snakeManager.updateState(dt);
     },
 
     lateUpdate(dt) {
-        this.battlefield.updateCameraPosition();
+        this._updateCameraPosition();
     },
 
     // 初始化组件
     _initComponent() {
-        // 战场
-        this.battlefield = this.battlefield.getComponent('Battlefield');
+        // 食品工厂
+        this.factory = this.factory.getComponent('Factory');
+
+        // 蛇
+        this.snakeManager = this.snakeManager.getComponent('SnakeManager');
 
         // 方向控制器
         this.controler = this.controler.getComponent('Controler');
@@ -88,7 +116,7 @@ cc.Class({
             scene: SCENES.GAME,
             action: SYS_OPEARTION.UPDATE_DIRECTION,
             callback: (props) => {
-                this.battlefield.setSnakeDirectionVec(props.vec);
+                this.snakeManager.setSnakeDirection(props.vec, this._userId);
             }
         });
 
@@ -97,7 +125,7 @@ cc.Class({
             scene: SCENES.GAME,
             action: SYS_OPEARTION.RECOVER_FOOD,
             callback: (props) => {
-                this.battlefield.recoverFood(props.uuid);
+                this._recoverFood(props.uuid);
             }
         });
     },
@@ -111,13 +139,80 @@ cc.Class({
         this.btnSpeed.on(cc.Node.EventType.TOUCH_END, this._speedNormal, this);
     },
 
+    /*
+     * 设置速度
+     * @param (number) speed 速度
+     * @param (string) name 名称
+     */
+    setSnakeSpeed(speed, name = 'default') {
+        this.snakeManager.setSpeed(speed, name);
+    },
+
+    /*
+     * 设置移动向量
+     * @param (object) vec 向量
+     * @param (string) name 名称
+     */
+    setSnakeDirection(vec, name = 'default') {
+        this.snakeManager.setDirection(vec, name);
+    },
+
     // 加速
     _speedUp() {
-        this.battlefield.setSnakeSpeed(SPEED.UP);
+        this.snakeManager.setSpeed(SPEED.UP, this._userId);
     },
 
     // 加速
     _speedNormal() {
-        this.battlefield.setSnakeSpeed(SPEED.NORMAL);
+        this.snakeManager.setSpeed(SPEED.NORMAL, this._userId);
+    },
+
+    /*
+     * 回收
+     * @param (string) uuid 节点uuid  
+     */
+    _recoverFood(uuid) {
+        this.factory.recover(uuid);
+
+        this.factory.add();
+    },
+
+    // 更新摄像机位置
+    _updateCameraPosition() {
+        // camera跟踪蛇头 关键代码！！！
+        const snakePos = this.snakeManager.getHeadPositonByName(this._userId);
+        const cameraPos = this._checkCameraOutRange(snakePos);
+
+        this.camera.position = cameraPos;
+    },
+
+    /*
+     * 检查摄像机超出边界
+     * @param (object) vec 向量
+     */
+    _checkCameraOutRange(vec) {
+        const _vec = this.camera.parent.convertToNodeSpaceAR(vec);
+        const snakeMoveRange = this.snakeManager.getMoveRange();
+        const visibleSize = cc.director.getVisibleSize();
+        const cameraMoveRangeX = Math.floor((snakeMoveRange.x - visibleSize.width) / 2);
+        const cameraMoveRangeY = Math.floor((snakeMoveRange.y - visibleSize.height) / 2);
+
+        if (_vec.x > cameraMoveRangeX) {
+            _vec.x = cameraMoveRangeX;
+        }
+
+        if (_vec.x < -cameraMoveRangeX) {
+            _vec.x = -cameraMoveRangeX;
+        }
+
+        if (_vec.y > cameraMoveRangeY) {
+            _vec.y = cameraMoveRangeY;
+        }
+
+        if (_vec.y < -cameraMoveRangeY) {
+            _vec.y = -cameraMoveRangeY;
+        }
+
+        return _vec;
     }
 });

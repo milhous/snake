@@ -14,18 +14,12 @@ cc.Class({
         // 身体对象池
         this._bodyPool = null;
 
-        // 玩家数量
-        this._multiplePlayers = 5;
-
         // 起始长度
         this._initLen = 5;
         // 最大长度
         this._maxLen = 10;
 
-        // 蛇头
-        this._head = null;
-        // 蛇身
-        this._bodys = [];
+        this._snakes = {};
     },
 
     properties: {
@@ -56,19 +50,13 @@ cc.Class({
     },
 
     /* 
-     * 移动
+     * 更新状态
      * @param (number) dt 距离上一帧间隔时间
      */
-    move(dt) {
-        if (this._direction === null || this._speed === null) {
-            return;
-        }
-
-        this._updateHeadAngle();
-
-        this._updateHeadPosition();
-
-        this._updateBodyPosition();
+    updateState(dt) {
+        Object.keys(this._snakes).map((key) => {
+            this._snakes[key].move(dt);
+        });
     },
 
     /*
@@ -95,7 +83,7 @@ cc.Class({
      * @param (object) pool 对象池
      */
     _getNodeFromPool(prefab, pool) {
-        const _node = null;
+        let _node = null;
 
         if (_pool.size() > 0) { // 通过 size 接口判断对象池中是否有空闲的对象
             _node = _pool.get();
@@ -111,60 +99,103 @@ cc.Class({
      * @param (string) name 名称
      * @param (number) x X轴位置
      * @param (number) y Y轴位置
+     * @param (number) speed 速度
+     * @param (object) direction 方向向量
      */
-    create(name = 'default', x = 0, y = 0) {
+    create({
+        name = 'default',
+        x = 0,
+        y = 0,
+        speed,
+        direction
+    }) {
+        const _arr = [];
+
         const _head = this._getNodeFromPool(this.headPrefab, this._headPool);
         this.node.addChild(_head);
 
-        const _bodys = [];
+        _arr.push(_head);
 
         for (let i = 0; i < this._initLen; i++) {
-            this._addBody();
+            const _body = this._getNodeFromPool(this.bodyPrefab, this._bodyPool);
+            body.isMove = false;
+            this.node.addChild(_body);
+
+            _arr.push(_body);
         }
 
-        const _bodys = this._createBody();
-    },
+        const _snake = new Snake();
+        _snake.init({
+            snake: _arr,
+            initX: x,
+            initY: y,
+            rangeX: this.node.width/2,
+            rangeY: this.node.height/2,
+            speed: speed,
+            direction: direction
+        });
 
-    // 创建身体
-    _createBody(name) {
-        const _body = cc.instantiate(this.bodyPrefab);
-        this._bodys.push(_body);
-        this.node.addChild(_body);
-
-
-        for (let i = 0; i < this._initLen; i++) {
-            this._addBody();
-        }
-    },
-
-    // 增加身体
-    _addBody() {
-        const _body = cc.instantiate(this.bodyPrefab);
-        this._bodys.push(_body);
-        this.node.addChild(_body);
+        this._snakes[name] = _snake;
     },
 
     /*
      * 设置方向向量
      * @param (object) vec 向量
+     * @param (string) name 名称
      */
-    setDirectionVec(vec) {
-        this._direction = vec;
+    setDirection(vec, name = 'default') {
+        const _snake = this.getSnakeByName(name);
+
+        if (_snake === null) {
+            return;
+        }
+
+        _snake.setDirection(vec);
     },
 
     /*
      * 设置速度
      * @param (number) speed 速度
+     * @param (string) name 名字
      */
-    setSpeed(speed) {
-        this._speed = speed;
+    setSpeed(speed, name = 'default') {
+        const _snake = this.getSnakeByName(name);
+
+        if (_snake === null) {
+            return;
+        }
+
+        _snake.setSpeed(speed);
     },
 
-    // 获取蛇头位置
-    getHeadPositon() {
-        const _vec = this._head.convertToWorldSpaceAR(cc.Vec2.ZERO);
+    /*
+     * 获取蛇头位置
+     * @param (string) name 名字
+     */
+    getHeadPositonByName(name = 'default') {
+        const _snake = this.getSnakeByName(name);
+
+        if (_snake === null) {
+            return;
+        }
+
+        const _vec = _snake.getHeadPositon();
 
         return _vec;
+    },
+
+    /*
+     * 通过名称获取实例
+     * @param (string) name 名字
+     */
+    getSnakeByName(name = 'default') {
+        let _snake = null;
+
+        if (typeof this._snakes[name] !== 'undefined') {
+            _snake = this._snakes[name];
+        }
+
+        return _snake;
     },
 
     // 获取活动区域

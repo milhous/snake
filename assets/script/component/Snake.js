@@ -3,11 +3,9 @@ export default class Snake {
         this._snake = [];
 
         // 速度
-        this._speed = 0;
+        this._speed = null;
         // 方向向量
         this._direction = null;
-        // 长度为 1 的标准化过后的向量
-        this._normalize = null;
 
         // X轴移动最大范围
         this._rangeX = 0;
@@ -22,19 +20,43 @@ export default class Snake {
      * @param (number) initY Y轴位置
      * @param (number) rangeX X轴移动范围
      * @param (number) rangeY Y轴移动范围
+     * @param (number) speed 速度
+     * @param (object) direction 方向向量
      */
     init({
         snake,
         initX,
         initY,
         rangeX,
-        rangeY
+        rangeY,
+        speed,
+        direction
     }) {
         this._snake = snake;
 
+        this._setInitPosition(initX, initY);
+
         this.setMoveRange(rangeX, rangeY);
 
-        this._setInitPosition(initX, initY);
+        this.setSpeed(speed);
+
+        this.setDirection(direction);
+    }
+
+    /* 
+     * 移动
+     * @param (number) dt 距离上一帧间隔时间
+     */
+    move(dt) {
+        if (this._direction === null || this._speed === null) {
+            return;
+        }
+
+        this._updateHeadAngle();
+
+        this._updateHeadPosition();
+
+        this._updateBodyPosition();
     }
 
     /*
@@ -62,44 +84,73 @@ export default class Snake {
         this._rangeY = y;
     }
 
+    /*
+     * 设置方向向量
+     * @param (object) vec 向量
+     */
+    setDirection(vec) {
+        this._direction = vec;
+    }
+
+    /*
+     * 设置速度
+     * @param (number) speed 速度
+     */
+    setSpeed(speed) {
+        this._speed = speed;
+    }
+
+    // 获取蛇头位置
+    getHeadPositon() {
+        const _head = this._snake[0];
+        const _vec = _head.convertToWorldSpaceAR(cc.Vec2.ZERO);
+
+        return _vec;
+    }
+
     // 更新头部位置
     _updateHeadPosition() {
-        this._normalize = cc.pNormalize(this._direction);
+        const _head = this._snake[0];
+        const _normalize = cc.pNormalize(this._direction);
 
-        const _x = this._head.x + this._normalize.x * this._head.width * this._speed;
-        const _y = this._head.y + this._normalize.y * this._head.width * this._speed;
+        const _x = _head.x + _normalize.x * _head.width * this._speed;
+        const _y = _head.y + _normalize.y * _head.width * this._speed;
         const _vec = this._checkOutRange(_x, _y);
 
-        this._head.setPosition(_vec);
+        _head.setPosition(_vec);
     }
 
     // 更新身体位置
     _updateBodyPosition() {
-        this._bodys.map((body, index, arr) => {
-            const curVec = index === 0 ? this._head.getPosition() : arr[index - 1].getPosition();
-            const preVec = body.getPosition();
-            const subVec = cc.pSub(curVec, preVec);
+        this._snake.map((body, index, arr) => {
+            // 头部索引值等于0
+            if (index > 0) {
+                const curVec = arr[index - 1].getPosition();
+                const preVec = body.getPosition();
+                const subVec = cc.pSub(curVec, preVec);
 
-            if (!body.isMove) {
-                const distance = cc.pDistance(curVec, preVec);
+                if (!body.isMove) {
+                    const distance = cc.pDistance(curVec, preVec);
 
-                if (distance >= body.width / 2) {
-                    body.isMove = true;
+                    if (distance >= body.width / 2) {
+                        body.isMove = true;
+                    }
                 }
-            }
 
-            if (body.isMove) {
-                body.x += subVec.x * this._speed;
-                body.y += subVec.y * this._speed;
+                if (body.isMove) {
+                    body.x += subVec.x * this._speed;
+                    body.y += subVec.y * this._speed;
+                }
             }
         });
     }
 
     // 更新移动角度
     _updateHeadAngle() {
+        const _head = this._snake[0];
         const angle = cc.pToAngle(this._direction) / Math.PI * 180;
 
-        this._head.rotation = -angle;
+        _head.rotation = -angle;
     }
 
     /*
@@ -136,4 +187,4 @@ export default class Snake {
 
         return _vec;
     }
-});
+}
