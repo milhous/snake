@@ -1,5 +1,6 @@
 import {
-    getRandom
+    getRandom,
+    getUUID
 } from 'tools';
 
 // 蛇
@@ -17,7 +18,7 @@ cc.Class({
         // 起始长度
         this._initLen = 5;
         // 最大长度
-        this._maxLen = 10;
+        this._maxLen = 20;
 
         this._snakes = {};
     },
@@ -96,28 +97,29 @@ cc.Class({
 
     /*
      * 创建
-     * @param (string) name 名称
      * @param (number) x X轴位置
      * @param (number) y Y轴位置
      * @param (number) speed 速度
      * @param (object) direction 方向向量
      */
     create({
-        name = 'default',
         x = 0,
         y = 0,
         speed,
         direction
     }) {
+        const _uuid = getUUID();
         const _arr = [];
 
         const _head = this._getNodeFromPool(this.headPrefab, this._headPool);
+        _head.snakeId = _uuid;
         this.node.addChild(_head);
 
         _arr.push(_head);
 
         for (let i = 0; i < this._initLen; i++) {
             const _body = this._getNodeFromPool(this.bodyPrefab, this._bodyPool);
+            _body.snakeId = _uuid;
             _body.isMove = false;
             this.node.addChild(_body);
 
@@ -125,26 +127,30 @@ cc.Class({
         }
 
         const _snake = new Snake();
+
         _snake.init({
             snake: _arr,
             initX: x,
             initY: y,
-            rangeX: this.node.width/2,
-            rangeY: this.node.height/2,
+            rangeX: this.node.width / 2,
+            rangeY: this.node.height / 2,
             speed: speed,
             direction: direction
         });
+        _snake.setSkin(getRandom(0, 4));
 
-        this._snakes[name] = _snake;
+        this._snakes[_uuid] = _snake;
+
+        return _uuid;
     },
 
     /*
      * 设置方向向量
      * @param (object) vec 向量
-     * @param (string) name 名称
+     * @param (string) uuid uuid
      */
-    setDirection(vec, name = 'default') {
-        const _snake = this.getSnakeByName(name);
+    setDirection(vec, uuid) {
+        const _snake = this.getSnakeByUUID(uuid);
 
         if (_snake === null) {
             return;
@@ -154,12 +160,27 @@ cc.Class({
     },
 
     /*
+     * 获取方向向量
+     * @param (string) uuid uuid
+     */
+    getDirection(uuid) {
+        let _vec = null;
+        const _snake = this.getSnakeByUUID(uuid);
+
+        if (_snake !== null) {
+            _vec = _snake.getDirection();
+        }
+
+        return _vec;
+    },
+
+    /*
      * 设置速度
      * @param (number) speed 速度
-     * @param (string) name 名字
+     * @param (string) uuid uuid
      */
-    setSpeed(speed, name = 'default') {
-        const _snake = this.getSnakeByName(name);
+    setSpeed(speed, uuid) {
+        const _snake = this.getSnakeByUUID(uuid);
 
         if (_snake === null) {
             return;
@@ -169,11 +190,38 @@ cc.Class({
     },
 
     /*
-     * 获取蛇头位置
-     * @param (string) name 名字
+     * 更新成长值
+     * @param (string) uuid uuid
      */
-    getHeadPositonByName(name = 'default') {
-        const _snake = this.getSnakeByName(name);
+    updateGrowth(uuid) {
+        const _snake = this.getSnakeByUUID(uuid);
+
+        if (_snake === null || _snake.getLength() > this._maxLen) {
+            return;
+        }
+
+        let _growth = _snake.getGrowth();
+
+        cc.log(uuid, _growth);
+
+        if (_growth%10 === 9) {
+            const _body = this._getNodeFromPool(this.bodyPrefab, this._bodyPool);
+            _body.snakeId = uuid;
+            _body.isMove = false;
+            this.node.addChild(_body);
+
+            _snake.add(_body);
+        }
+
+        _snake.addGrowth(1);
+    },
+
+    /*
+     * 获取蛇头位置
+     * @param (string) uuid uuid
+     */
+    getHeadPositonByUUID(uuid) {
+        const _snake = this.getSnakeByUUID(uuid);
 
         if (_snake === null) {
             return;
@@ -186,13 +234,13 @@ cc.Class({
 
     /*
      * 通过名称获取实例
-     * @param (string) name 名字
+     * @param (string) uuid uuid
      */
-    getSnakeByName(name = 'default') {
+    getSnakeByUUID(uuid) {
         let _snake = null;
 
-        if (typeof this._snakes[name] !== 'undefined') {
-            _snake = this._snakes[name];
+        if (typeof this._snakes[uuid] !== 'undefined') {
+            _snake = this._snakes[uuid];
         }
 
         return _snake;

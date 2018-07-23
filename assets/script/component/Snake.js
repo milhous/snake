@@ -8,6 +8,11 @@ export default class Snake {
         this._direction = null;
         // 长度为 1 的标准化过后的向量
         this._normalize = null;
+        // 皮肤索引值
+        this._skinIndex = 0;
+
+        // 成长值
+        this._growth = 0;
 
         // X轴移动最大范围
         this._rangeX = 0;
@@ -62,6 +67,49 @@ export default class Snake {
     }
 
     /*
+     * 增加身体
+     * @param (object) body 身体
+     */
+    add(body) {
+        const _len = this._snake.length;
+
+        body.zIndex = 100 - _len;
+        body.x = this._snake[_len - 1].x;
+        body.y = this._snake[_len - 1].y;
+
+        const bodyComp = body.getComponent('Body');
+        bodyComp.updateSkin(this._skinIndex);
+
+        this._snake.push(body);
+    }
+
+    /*
+     * 增加成长值
+     * @param (number) growth 成长值
+     */
+    addGrowth(growth = 1) {
+        this._growth += growth;
+    }
+
+    /*
+     * 设置成长值
+     * @param (number) growth 成长值
+     */
+    setGrowth(growth = 0) {
+        this._growth = growth;
+    }
+
+    // 获取成长值
+    getGrowth() {
+        return this._growth;
+    }
+
+    // 获取长度
+    getLength() {
+        return this._snake.length - 1;
+    }
+
+    /*
      * 设置初始位置
      * @param (number) x X轴移动范围
      * @param (number) y Y轴移动范围
@@ -94,6 +142,11 @@ export default class Snake {
         this._direction = vec;
     }
 
+    // 获取方向向量
+    getDirection(vec) {
+        return this._direction;
+    }
+
     /*
      * 设置速度
      * @param (number) speed 速度
@@ -102,12 +155,46 @@ export default class Snake {
         this._speed = speed;
     }
 
+    /*
+     * 设置皮肤
+     * @param (number) skinIndex 皮肤索引值
+     */
+    setSkin(skinIndex) {
+        this._skinIndex = skinIndex;
+
+        this._snake.map((part, index) => {
+            let partComp = null;
+
+            if (index > 0) {
+                partComp = part.getComponent('Body');
+            } else {
+                partComp = part.getComponent('Head');
+            }
+
+            partComp.updateSkin(skinIndex);
+        });
+    }
+
     // 获取蛇头位置
     getHeadPositon() {
         const _head = this._snake[0];
         const _vec = _head.convertToWorldSpaceAR(cc.Vec2.ZERO);
 
         return _vec;
+    }
+
+    /*
+     * 获取身体部位
+     * @param (number) index 索引值
+     */
+    getPartByIndex(index) {
+        let _node = null;
+
+        if (typeof this._snake[index] !== 'undefined') {
+            _node = this._snake[index];
+        }
+
+        return _node;
     }
 
     // 更新头部位置

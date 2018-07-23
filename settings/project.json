@@ -13,11 +13,26 @@
     [
       false,
       false,
+      true,
+      null,
       true
     ],
     [
       false,
       true,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
       false
     ]
   ],
@@ -29,7 +44,9 @@
   "group-list": [
     "default",
     "head",
-    "food"
+    "food",
+    "body",
+    "probe"
   ],
   "simulator-orientation": false,
   "simulator-resolution": {
@@ -37,6 +54,5 @@
     "width": 960
   },
   "use-customize-simulator": false,
-  "use-project-simulator-setting": false,
-  "start-scene": "current"
+  "use-project-simulator-setting": false
 }

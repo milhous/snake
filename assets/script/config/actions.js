@@ -11,6 +11,7 @@ const USER_BEHAVIOR = {
  * 系统操作
  */
 const SYS_OPEARTION = {
+	SNAKE_AVOID: 'sys:snakeAvoid', // 回避
     UPDATE_DIRECTION: 'sys::updateDirection', // 更新方向
     RECOVER_FOOD: 'sys:recoverFood' // 回收资源
 };

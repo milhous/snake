@@ -33,8 +33,8 @@ cc.Class({
         this._effect(dt);
     },
 
-    onCollisionEnter(other, self) {
-        const circleCollider = self.node.getComponent(cc.CircleCollider);
+    onCollisionEnter(other) {
+        const circleCollider = this.node.getComponent(cc.CircleCollider);
         circleCollider.enabled = false;
 
         this._time = 0;
@@ -86,14 +86,15 @@ cc.Class({
                 this.node.y += _speed;
             }
         } else {
-            this._target = null;
-
             worker.postMessage({
                 cmd: SYS_OPEARTION.RECOVER_FOOD,
                 data: {
-                    uuid: this.node.uuid
+                    foodId: this.node.uuid,
+                    snakeId: this._target.snakeId
                 }
             });
+            
+            this._target = null;
         }
     }
 });

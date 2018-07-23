@@ -11,14 +11,8 @@ cc.Class({
     extends: cc.Component,
 
     ctor() {
-        // 蛇
-        this.snake = null;
-
-        // 食堂
-        this.canteen = null;
-
         // 用户ID
-        this._userId = 'default';
+        this._userId = null;
     },
 
     properties: {
@@ -78,10 +72,82 @@ cc.Class({
 
         this.snakeManager.init();
 
-        this.snakeManager.create({
+        this._userId = this.snakeManager.create({
             name: this._userId,
             x: 0,
             y: 0,
+            speed: SPEED.NORMAL,
+            direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
+        });
+
+        this.snakeManager.create({
+            name: 'computer',
+            x: 500,
+            y: 200,
+            speed: SPEED.NORMAL,
+            direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
+        });
+
+        this.snakeManager.create({
+            name: 'computer2',
+            x: -500,
+            y: -200,
+            speed: SPEED.NORMAL,
+            direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
+        });
+
+        this.snakeManager.create({
+            name: 'computer3',
+            x: 1000,
+            y: 300,
+            speed: SPEED.NORMAL,
+            direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
+        });
+
+        this.snakeManager.create({
+            name: 'computer4',
+            x: -1000,
+            y: -300,
+            speed: SPEED.NORMAL,
+            direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
+        });
+
+        this.snakeManager.create({
+            name: 'computer5',
+            x: -900,
+            y: -300,
+            speed: SPEED.NORMAL,
+            direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
+        });
+
+        this.snakeManager.create({
+            name: 'computer6',
+            x: 900,
+            y: -300,
+            speed: SPEED.NORMAL,
+            direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
+        });
+
+        this.snakeManager.create({
+            name: 'computer7',
+            x: -800,
+            y: -300,
+            speed: SPEED.NORMAL,
+            direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
+        });
+
+        this.snakeManager.create({
+            name: 'computer8',
+            x: 800,
+            y: -300,
+            speed: SPEED.NORMAL,
+            direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
+        });
+
+        this.snakeManager.create({
+            name: 'computer9',
+            x: -700,
+            y: -300,
             speed: SPEED.NORMAL,
             direction: cc.v2(100 * cc.randomMinus1To1(), 100 * cc.randomMinus1To1())
         });
@@ -114,6 +180,15 @@ cc.Class({
         // SYSTEM - 更新方向变量
         mediator.add({
             scene: SCENES.GAME,
+            action: SYS_OPEARTION.SNAKE_AVOID,
+            callback: (props) => {
+                this._snakeAutoAvoid(props);
+            }
+        });
+
+        // SYSTEM - 更新方向变量
+        mediator.add({
+            scene: SCENES.GAME,
             action: SYS_OPEARTION.UPDATE_DIRECTION,
             callback: (props) => {
                 this._setSnakeDirection(props.vec, this._userId);
@@ -125,7 +200,7 @@ cc.Class({
             scene: SCENES.GAME,
             action: SYS_OPEARTION.RECOVER_FOOD,
             callback: (props) => {
-                this._recoverFood(props.uuid);
+                this._recoverFood(props);
             }
         });
     },
@@ -168,11 +243,37 @@ cc.Class({
     },
 
     /*
-     * 回收
-     * @param (string) uuid 节点uuid  
+     * 自动躲避
+     * @param (object) data 数据
      */
-    _recoverFood(uuid) {
-        this.factory.recover(uuid);
+    _snakeAutoAvoid(data) {
+        if (data.selfId === this._userId) {
+            return;
+        }
+
+        const _snake = this.snakeManager.getSnakeByUUID(data.selfId);
+
+        if (_snake === null) {
+            return;
+        }
+
+        const pVec1 = _snake.getPartByIndex(0).getPosition();
+        const pVec2 = _snake.getPartByIndex(1).getPosition();
+        const subVec = cc.pSub(pVec1, pVec2);
+        const _x = -subVec.x;
+        const _y = cc.randomMinus1To1()*subVec.y;
+
+        this.snakeManager.setDirection(cc.v2(_x, _y), data.selfId);
+    },
+    
+    /*
+     * 回收
+     * @param (object) data 数据
+     */
+    _recoverFood(data) {
+        this.snakeManager.updateGrowth(data.snakeId);
+
+        this.factory.recover(data.foodId);
 
         this.factory.add();
     },
@@ -180,7 +281,7 @@ cc.Class({
     // 更新摄像机位置
     _updateCameraPosition() {
         // camera跟踪蛇头 关键代码！！！
-        const snakePos = this.snakeManager.getHeadPositonByName(this._userId);
+        const snakePos = this.snakeManager.getHeadPositonByUUID(this._userId);
         const cameraPos = this._checkCameraOutRange(snakePos);
 
         this.camera.position = cameraPos;

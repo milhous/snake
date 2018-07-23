@@ -1,3 +1,6 @@
+import worker from 'worker';
+import { SYS_OPEARTION } from 'actions';
+
 cc.Class({
     extends: cc.Component,
 
@@ -11,12 +14,40 @@ cc.Class({
 
     // LIFE-CYCLE CALLBACKS:
 
-    onLoad () {
+    onLoad() {
 
     },
 
-    start () {
+    start() {
 
+    },
+
+    onCollisionEnter(other) {
+        const group = cc.game.groupList[other.node.groupIndex];
+
+        if (other.node.parent.snakeId === this.node.snakeId) {
+            return;
+        }
+
+        switch (group) {
+            case 'probe':
+                worker.postMessage({
+                    cmd: SYS_OPEARTION.SNAKE_AVOID,
+                    data: {
+                        otherId: other.node.parent.snakeId,
+                        selfId: this.node.snakeId
+                    }
+                });
+
+                break;
+            case 'body':
+
+                break;
+            case 'food':
+
+                break;
+            default:
+        }
     },
 
     /*
