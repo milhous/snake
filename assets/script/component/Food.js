@@ -6,8 +6,8 @@ cc.Class({
     extends: cc.Component,
 
     ctor() {
-        // 移动速度
-        this._speed = 4.6;
+        // 时间
+        this._time = 0;
 
         // 目标
         this._target = null;
@@ -30,12 +30,14 @@ cc.Class({
     },
 
     update(dt) {
-        this._effect();
+        this._effect(dt);
     },
 
     onCollisionEnter(other, self) {
         const circleCollider = self.node.getComponent(cc.CircleCollider);
         circleCollider.enabled = false;
+
+        this._time = 0;
 
         this._target = other.node;
     },
@@ -53,11 +55,16 @@ cc.Class({
         circleCollider.enabled = true;
     },
 
-    // 动效
-    _effect() {
+    /* 
+     * 动效
+     * @param (number) dt 距离上一帧间隔时间
+     */
+    _effect(dt) {
         if (this._target === null) {
             return;
         }
+
+        this._time += dt;
 
         const preVec = this.node.getPosition();
         const curVec = this._target.getPosition();
@@ -65,17 +72,18 @@ cc.Class({
 
         if (distance > this._target.width / 2) {
             const subVec = cc.pSub(curVec, preVec);
+            const _speed = distance * this._time;
 
             if (subVec.x < 0) {
-                this.node.x += -this._speed;
+                this.node.x += -_speed;
             } else {
-                this.node.x += this._speed;
+                this.node.x += _speed;
             }
 
             if (subVec.y < 0) {
-                this.node.y += -this._speed;
+                this.node.y += -_speed;
             } else {
-                this.node.y += this._speed;
+                this.node.y += _speed;
             }
         } else {
             this._target = null;

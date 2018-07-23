@@ -116,7 +116,7 @@ cc.Class({
             scene: SCENES.GAME,
             action: SYS_OPEARTION.UPDATE_DIRECTION,
             callback: (props) => {
-                this.snakeManager.setSnakeDirection(props.vec, this._userId);
+                this._setSnakeDirection(props.vec, this._userId);
             }
         });
 
@@ -144,7 +144,7 @@ cc.Class({
      * @param (number) speed 速度
      * @param (string) name 名称
      */
-    setSnakeSpeed(speed, name = 'default') {
+    _setSnakeSpeed(speed, name = 'default') {
         this.snakeManager.setSpeed(speed, name);
     },
 
@@ -153,7 +153,7 @@ cc.Class({
      * @param (object) vec 向量
      * @param (string) name 名称
      */
-    setSnakeDirection(vec, name = 'default') {
+    _setSnakeDirection(vec, name = 'default') {
         this.snakeManager.setDirection(vec, name);
     },
 

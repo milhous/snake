@@ -6,6 +6,8 @@ export default class Snake {
         this._speed = null;
         // 方向向量
         this._direction = null;
+        // 长度为 1 的标准化过后的向量
+        this._normalize = null;
 
         // X轴移动最大范围
         this._rangeX = 0;
@@ -80,8 +82,8 @@ export default class Snake {
      * @param (number) rangeY Y轴移动最大范围
      */
     setMoveRange(rangeX, rangeY) {
-        this._rangeX = x;
-        this._rangeY = y;
+        this._rangeX = rangeX;
+        this._rangeY = rangeY;
     }
 
     /*
@@ -111,10 +113,10 @@ export default class Snake {
     // 更新头部位置
     _updateHeadPosition() {
         const _head = this._snake[0];
-        const _normalize = cc.pNormalize(this._direction);
+        this._normalize = cc.pNormalize(this._direction);
 
-        const _x = _head.x + _normalize.x * _head.width * this._speed;
-        const _y = _head.y + _normalize.y * _head.width * this._speed;
+        const _x = _head.x + this._normalize.x * _head.width * this._speed;
+        const _y = _head.y + this._normalize.y * _head.width * this._speed;
         const _vec = this._checkOutRange(_x, _y);
 
         _head.setPosition(_vec);

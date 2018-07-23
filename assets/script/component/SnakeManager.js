@@ -85,8 +85,8 @@ cc.Class({
     _getNodeFromPool(prefab, pool) {
         let _node = null;
 
-        if (_pool.size() > 0) { // 通过 size 接口判断对象池中是否有空闲的对象
-            _node = _pool.get();
+        if (pool.size() > 0) { // 通过 size 接口判断对象池中是否有空闲的对象
+            _node = pool.get();
         } else { // 如果没有空闲对象，也就是对象池中备用对象不够时，用 cc.instantiate 重新创建
             _node = cc.instantiate(prefab);
         }
@@ -118,7 +118,7 @@ cc.Class({
 
         for (let i = 0; i < this._initLen; i++) {
             const _body = this._getNodeFromPool(this.bodyPrefab, this._bodyPool);
-            body.isMove = false;
+            _body.isMove = false;
             this.node.addChild(_body);
 
             _arr.push(_body);
