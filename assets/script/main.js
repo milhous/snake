@@ -1,4 +1,5 @@
 import mediator from 'mediator';
+import 'seedrandom.min'
 import {
     SPEED,
     SCENES
@@ -45,7 +46,7 @@ cc.Class({
 
     onLoad() {
         // 显示FPS信息
-        cc.director.setDisplayStats(true);
+        cc.director.setDisplayStats(false);
 
         // 碰撞检测开启
         const manager = cc.director.getCollisionManager();

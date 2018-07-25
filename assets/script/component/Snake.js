@@ -64,6 +64,8 @@ export default class Snake {
         this._updateHeadPosition();
 
         this._updateBodyPosition();
+
+        cc.log(this._direction);
     }
 
     /*

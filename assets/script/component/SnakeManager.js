@@ -200,9 +200,7 @@ cc.Class({
             return;
         }
 
-        let _growth = _snake.getGrowth();
-
-        cc.log(uuid, _growth);
+        const _growth = _snake.getGrowth();
 
         if (_growth%10 === 9) {
             const _body = this._getNodeFromPool(this.bodyPrefab, this._bodyPool);
